@@ -1,37 +1,32 @@
-import {CartForm, Money} from '@shopify/hydrogen';
-import {useRef} from 'react';
+"use client"
+
+import { CartForm, Money } from "@shopify/hydrogen"
+import { useRef } from "react"
 
 /**
  * @param {CartSummaryProps}
  */
-export function CartSummary({cart, layout}) {
-  const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
+export function CartSummary({ cart, layout }) {
+  const className = layout === "page" ? "cart-summary-page" : "cart-summary-aside"
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
       <h4>Totals</h4>
       <dl className="cart-subtotal">
         <dt>Subtotal</dt>
-        <dd>
-          {cart.cost?.subtotalAmount?.amount ? (
-            <Money data={cart.cost?.subtotalAmount} />
-          ) : (
-            '-'
-          )}
-        </dd>
+        <dd>{cart.cost?.subtotalAmount?.amount ? <Money data={cart.cost?.subtotalAmount} /> : "-"}</dd>
       </dl>
       <CartDiscounts discountCodes={cart.discountCodes} />
       <CartGiftCard giftCardCodes={cart.appliedGiftCards} />
       <CartCheckoutActions checkoutUrl={cart.checkoutUrl} />
     </div>
-  );
+  )
 }
 /**
  * @param {{checkoutUrl?: string}}
  */
-function CartCheckoutActions({checkoutUrl}) {
-  if (!checkoutUrl) return null;
+function CartCheckoutActions({ checkoutUrl }) {
+  if (!checkoutUrl) return null
 
   return (
     <div>
@@ -40,7 +35,7 @@ function CartCheckoutActions({checkoutUrl}) {
       </a>
       <br />
     </div>
-  );
+  )
 }
 
 /**
@@ -48,11 +43,8 @@ function CartCheckoutActions({checkoutUrl}) {
  *   discountCodes?: CartApiQueryFragment['discountCodes'];
  * }}
  */
-function CartDiscounts({discountCodes}) {
-  const codes =
-    discountCodes
-      ?.filter((discount) => discount.applicable)
-      ?.map(({code}) => code) || [];
+function CartDiscounts({ discountCodes }) {
+  const codes = discountCodes?.filter((discount) => discount.applicable)?.map(({ code }) => code) || []
 
   return (
     <div>
@@ -62,7 +54,7 @@ function CartDiscounts({discountCodes}) {
           <dt>Discount(s)</dt>
           <UpdateDiscountForm>
             <div className="cart-discount">
-              <code>{codes?.join(', ')}</code>
+              <code>{codes?.join(", ")}</code>
               &nbsp;
               <button>Remove</button>
             </div>
@@ -79,7 +71,7 @@ function CartDiscounts({discountCodes}) {
         </div>
       </UpdateDiscountForm>
     </div>
-  );
+  )
 }
 
 /**
@@ -88,7 +80,7 @@ function CartDiscounts({discountCodes}) {
  *   children: React.ReactNode;
  * }}
  */
-function UpdateDiscountForm({discountCodes, children}) {
+function UpdateDiscountForm({ discountCodes, children }) {
   return (
     <CartForm
       route="/cart"
@@ -99,7 +91,7 @@ function UpdateDiscountForm({discountCodes, children}) {
     >
       {children}
     </CartForm>
-  );
+  )
 }
 
 /**
@@ -107,22 +99,21 @@ function UpdateDiscountForm({discountCodes, children}) {
  *   giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
  * }}
  */
-function CartGiftCard({giftCardCodes}) {
-  const appliedGiftCardCodes = useRef([]);
-  const giftCardCodeInput = useRef(null);
-  const codes =
-    giftCardCodes?.map(({lastCharacters}) => `***${lastCharacters}`) || [];
+function CartGiftCard({ giftCardCodes }) {
+  const appliedGiftCardCodes = useRef([])
+  const giftCardCodeInput = useRef(null)
+  const codes = giftCardCodes?.map(({ lastCharacters }) => `***${lastCharacters}`) || []
 
   function saveAppliedCode(code) {
-    const formattedCode = code.replace(/\s/g, ''); // Remove spaces
+    const formattedCode = code.replace(/\s/g, "") // Remove spaces
     if (!appliedGiftCardCodes.current.includes(formattedCode)) {
-      appliedGiftCardCodes.current.push(formattedCode);
+      appliedGiftCardCodes.current.push(formattedCode)
     }
-    giftCardCodeInput.current.value = '';
+    giftCardCodeInput.current.value = ""
   }
 
   function removeAppliedCode() {
-    appliedGiftCardCodes.current = [];
+    appliedGiftCardCodes.current = []
   }
 
   return (
@@ -133,7 +124,7 @@ function CartGiftCard({giftCardCodes}) {
           <dt>Applied Gift Card(s)</dt>
           <UpdateGiftCardForm>
             <div className="cart-discount">
-              <code>{codes?.join(', ')}</code>
+              <code>{codes?.join(", ")}</code>
               &nbsp;
               <button onSubmit={() => removeAppliedCode}>Remove</button>
             </div>
@@ -142,23 +133,15 @@ function CartGiftCard({giftCardCodes}) {
       </dl>
 
       {/* Show an input to apply a discount */}
-      <UpdateGiftCardForm
-        giftCardCodes={appliedGiftCardCodes.current}
-        saveAppliedCode={saveAppliedCode}
-      >
+      <UpdateGiftCardForm giftCardCodes={appliedGiftCardCodes.current} saveAppliedCode={saveAppliedCode}>
         <div>
-          <input
-            type="text"
-            name="giftCardCode"
-            placeholder="Gift card code"
-            ref={giftCardCodeInput}
-          />
+          <input type="text" name="giftCardCode" placeholder="Gift card code" ref={giftCardCodeInput} />
           &nbsp;
           <button type="submit">Apply</button>
         </div>
       </UpdateGiftCardForm>
     </div>
-  );
+  )
 }
 
 /**
@@ -169,7 +152,7 @@ function CartGiftCard({giftCardCodes}) {
  *   children: React.ReactNode;
  * }}
  */
-function UpdateGiftCardForm({giftCardCodes, saveAppliedCode, children}) {
+function UpdateGiftCardForm({ giftCardCodes, saveAppliedCode, children }) {
   return (
     <CartForm
       route="/cart"
@@ -179,14 +162,14 @@ function UpdateGiftCardForm({giftCardCodes, saveAppliedCode, children}) {
       }}
     >
       {(fetcher) => {
-        const code = fetcher.formData?.get('giftCardCode');
+        const code = fetcher.formData?.get("giftCardCode")
         if (code && saveAppliedCode) {
-          saveAppliedCode(code);
+          saveAppliedCode(code)
         }
-        return children;
+        return children
       }}
     </CartForm>
-  );
+  )
 }
 
 /**
@@ -199,3 +182,4 @@ function UpdateGiftCardForm({giftCardCodes, saveAppliedCode, children}) {
 /** @typedef {import('storefrontapi.generated').CartApiQueryFragment} CartApiQueryFragment */
 /** @typedef {import('~/components/CartMain').CartLayout} CartLayout */
 /** @typedef {import('@shopify/hydrogen').OptimisticCart} OptimisticCart */
+

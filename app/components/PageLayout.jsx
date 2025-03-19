@@ -1,58 +1,40 @@
-import {Await, Link} from '@remix-run/react';
-import {Suspense, useId} from 'react';
-import {Aside} from '~/components/Aside';
-import {Footer} from '~/components/Footer';
-import {Header, HeaderMenu} from '~/components/Header';
-import {CartMain} from '~/components/CartMain';
+import { Await } from "@remix-run/react"
+import { Suspense } from "react"
+import { Aside } from "~/components/Aside"
+import { Footer } from "~/components/Footer"
+import { Header, HeaderMenu } from "~/components/Header"
+import { CartMain } from "~/components/CartMain"
 
 /**
  * @param {PageLayoutProps}
  */
-export function PageLayout({
-  cart,
-  children = null,
-  footer,
-  header,
-  isLoggedIn,
-  publicStoreDomain,
-}) {
+export function PageLayout({ cart, children = null, footer, header, isLoggedIn, publicStoreDomain }) {
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      {header && (
-        <Header
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-        />
-      )}
+      {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} publicStoreDomain={publicStoreDomain} />}
       <main>{children}</main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
+      <Footer footer={footer} header={header} publicStoreDomain={publicStoreDomain} />
     </Aside.Provider>
-  );
+  )
 }
 
 /**
  * @param {{cart: PageLayoutProps['cart']}}
  */
-function CartAside({cart}) {
+function CartAside({ cart }) {
   return (
     <Aside type="cart" heading="CART">
       <Suspense fallback={<p>Loading cart ...</p>}>
         <Await resolve={cart}>
           {(cart) => {
-            return <CartMain cart={cart} layout="aside" />;
+            return <CartMain cart={cart} layout="aside" />
           }}
         </Await>
       </Suspense>
     </Aside>
-  );
+  )
 }
 
 /**
@@ -61,7 +43,7 @@ function CartAside({cart}) {
  *   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
  * }}
  */
-function MobileMenuAside({header, publicStoreDomain}) {
+function MobileMenuAside({ header, publicStoreDomain }) {
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
@@ -74,7 +56,7 @@ function MobileMenuAside({header, publicStoreDomain}) {
         />
       </Aside>
     )
-  );
+  )
 }
 
 /**
@@ -90,3 +72,4 @@ function MobileMenuAside({header, publicStoreDomain}) {
 /** @typedef {import('storefrontapi.generated').CartApiQueryFragment} CartApiQueryFragment */
 /** @typedef {import('storefrontapi.generated').FooterQuery} FooterQuery */
 /** @typedef {import('storefrontapi.generated').HeaderQuery} HeaderQuery */
+

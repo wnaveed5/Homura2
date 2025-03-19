@@ -11,7 +11,7 @@ export function getEmptyPredictiveSearchResult() {
       pages: [],
       queries: [],
     },
-  };
+  }
 }
 
 /**
@@ -29,22 +29,17 @@ export function getEmptyPredictiveSearchResult() {
  * ```
  * @param {UrlWithTrackingParams}
  */
-export function urlWithTrackingParams({
-  baseUrl,
-  trackingParams,
-  params: extraParams,
-  term,
-}) {
+export function urlWithTrackingParams({ baseUrl, trackingParams, params: extraParams, term }) {
   let search = new URLSearchParams({
     ...extraParams,
     q: encodeURIComponent(term),
-  }).toString();
+  }).toString()
 
   if (trackingParams) {
-    search = `${search}&${trackingParams}`;
+    search = `${search}&${trackingParams}`
   }
 
-  return `${baseUrl}?${search}`;
+  return `${baseUrl}?${search}`
 }
 
 /**
@@ -79,3 +74,4 @@ export function urlWithTrackingParams({
 
 /** @typedef {import('storefrontapi.generated').PredictiveSearchQuery} PredictiveSearchQuery */
 /** @typedef {import('storefrontapi.generated').RegularSearchQuery} RegularSearchQuery */
+

@@ -1,69 +1,58 @@
-import {Link, useLoaderData} from '@remix-run/react';
-import {
-  Money,
-  getPaginationVariables,
-  flattenConnection,
-} from '@shopify/hydrogen';
-import {CUSTOMER_ORDERS_QUERY} from '~/graphql/customer-account/CustomerOrdersQuery';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { Link, useLoaderData } from "@remix-run/react"
+import { Money, getPaginationVariables, flattenConnection } from "@shopify/hydrogen"
+import { CUSTOMER_ORDERS_QUERY } from "~/graphql/customer-account/CustomerOrdersQuery"
+import { PaginatedResourceSection } from "~/components/PaginatedResourceSection"
 
 /**
  * @type {MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Orders'}];
-};
+  return [{ title: "Orders" }]
+}
 
 /**
  * @param {LoaderFunctionArgs}
  */
-export async function loader({request, context}) {
+export async function loader({ request, context }) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 20,
-  });
+  })
 
-  const {data, errors} = await context.customerAccount.query(
-    CUSTOMER_ORDERS_QUERY,
-    {
-      variables: {
-        ...paginationVariables,
-      },
+  const { data, errors } = await context.customerAccount.query(CUSTOMER_ORDERS_QUERY, {
+    variables: {
+      ...paginationVariables,
     },
-  );
+  })
 
   if (errors?.length || !data?.customer) {
-    throw Error('Customer orders not found');
+    throw Error("Customer orders not found")
   }
 
-  return {customer: data.customer};
+  return { customer: data.customer }
 }
 
 export default function Orders() {
   /** @type {LoaderReturnData} */
-  const {customer} = useLoaderData();
-  const {orders} = customer;
-  return (
-    <div className="orders">
-      {orders.nodes.length ? <OrdersTable orders={orders} /> : <EmptyOrders />}
-    </div>
-  );
+  const { customer } = useLoaderData()
+  const { orders } = customer
+  return <div className="orders">{orders.nodes.length ? <OrdersTable orders={orders} /> : <EmptyOrders />}</div>
 }
 
 /**
  * @param {Pick<CustomerOrdersFragment, 'orders'>}
  */
-function OrdersTable({orders}) {
+function OrdersTable({ orders }) {
   return (
     <div className="acccount-orders">
       {orders?.nodes.length ? (
         <PaginatedResourceSection connection={orders}>
-          {({node: order}) => <OrderItem key={order.id} order={order} />}
+          {({ node: order }) => <OrderItem key={order.id} order={order} />}
         </PaginatedResourceSection>
       ) : (
         <EmptyOrders />
       )}
     </div>
-  );
+  )
 }
 
 function EmptyOrders() {
@@ -75,14 +64,14 @@ function EmptyOrders() {
         <Link to="/collections">Start Shopping →</Link>
       </p>
     </div>
-  );
+  )
 }
 
 /**
  * @param {{order: OrderItemFragment}}
  */
-function OrderItem({order}) {
-  const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
+function OrderItem({ order }) {
+  const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status
   return (
     <>
       <fieldset>
@@ -97,7 +86,7 @@ function OrderItem({order}) {
       </fieldset>
       <br />
     </>
-  );
+  )
 }
 
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
@@ -105,3 +94,4 @@ function OrderItem({order}) {
 /** @typedef {import('customer-accountapi.generated').CustomerOrdersFragment} CustomerOrdersFragment */
 /** @typedef {import('customer-accountapi.generated').OrderItemFragment} OrderItemFragment */
 /** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
+

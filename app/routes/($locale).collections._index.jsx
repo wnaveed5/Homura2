@@ -1,18 +1,18 @@
-import {useLoaderData, Link} from '@remix-run/react';
-import {getPaginationVariables, Image} from '@shopify/hydrogen';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { useLoaderData, Link } from "@remix-run/react"
+import { getPaginationVariables, Image } from "@shopify/hydrogen"
+import { PaginatedResourceSection } from "~/components/PaginatedResourceSection"
 
 /**
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
   // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
+  const deferredData = loadDeferredData(args)
 
   // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
+  const criticalData = await loadCriticalData(args)
 
-  return {...deferredData, ...criticalData};
+  return { ...deferredData, ...criticalData }
 }
 
 /**
@@ -20,19 +20,19 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({context, request}) {
+async function loadCriticalData({ context, request }) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 4,
-  });
+  })
 
-  const [{collections}] = await Promise.all([
+  const [{ collections }] = await Promise.all([
     context.storefront.query(COLLECTIONS_QUERY, {
       variables: paginationVariables,
     }),
     // Add other queries here, so that they are loaded in parallel
-  ]);
+  ])
 
-  return {collections};
+  return { collections }
 }
 
 /**
@@ -41,31 +41,22 @@ async function loadCriticalData({context, request}) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
-function loadDeferredData({context}) {
-  return {};
+function loadDeferredData({ context }) {
+  return {}
 }
 
 export default function Collections() {
   /** @type {LoaderReturnData} */
-  const {collections} = useLoaderData();
+  const { collections } = useLoaderData()
 
   return (
     <div className="collections">
       <h1>Collections</h1>
-      <PaginatedResourceSection
-        connection={collections}
-        resourcesClassName="collections-grid"
-      >
-        {({node: collection, index}) => (
-          <CollectionItem
-            key={collection.id}
-            collection={collection}
-            index={index}
-          />
-        )}
+      <PaginatedResourceSection connection={collections} resourcesClassName="collections-grid">
+        {({ node: collection, index }) => <CollectionItem key={collection.id} collection={collection} index={index} />}
       </PaginatedResourceSection>
     </div>
-  );
+  )
 }
 
 /**
@@ -74,26 +65,21 @@ export default function Collections() {
  *   index: number;
  * }}
  */
-function CollectionItem({collection, index}) {
+function CollectionItem({ collection, index }) {
   return (
-    <Link
-      className="collection-item"
-      key={collection.id}
-      to={`/collections/${collection.handle}`}
-      prefetch="intent"
-    >
+    <Link className="collection-item" key={collection.id} to={`/collections/${collection.handle}`} prefetch="intent">
       {collection?.image && (
         <Image
           alt={collection.image.altText || collection.title}
           aspectRatio="1/1"
           data={collection.image}
-          loading={index < 3 ? 'eager' : undefined}
+          loading={index < 3 ? "eager" : undefined}
           sizes="(min-width: 45em) 400px, 100vw"
         />
       )}
       <h5>{collection.title}</h5>
     </Link>
-  );
+  )
 }
 
 const COLLECTIONS_QUERY = `#graphql
@@ -134,8 +120,9 @@ const COLLECTIONS_QUERY = `#graphql
       }
     }
   }
-`;
+`
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @typedef {import('storefrontapi.generated').CollectionFragment} CollectionFragment */
 /** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
+

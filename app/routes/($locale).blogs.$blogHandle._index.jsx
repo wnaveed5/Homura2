@@ -1,25 +1,25 @@
-import {Link, useLoaderData} from '@remix-run/react';
-import {Image, getPaginationVariables} from '@shopify/hydrogen';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { Link, useLoaderData } from "@remix-run/react"
+import { Image, getPaginationVariables } from "@shopify/hydrogen"
+import { PaginatedResourceSection } from "~/components/PaginatedResourceSection"
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
-export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.blog.title ?? ''} blog`}];
-};
+export const meta = ({ data }) => {
+  return [{ title: `Hydrogen | ${data?.blog.title ?? ""} blog` }]
+}
 
 /**
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
   // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
+  const deferredData = loadDeferredData(args)
 
   // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
+  const criticalData = await loadCriticalData(args)
 
-  return {...deferredData, ...criticalData};
+  return { ...deferredData, ...criticalData }
 }
 
 /**
@@ -27,16 +27,16 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({context, request, params}) {
+async function loadCriticalData({ context, request, params }) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 4,
-  });
+  })
 
   if (!params.blogHandle) {
-    throw new Response(`blog not found`, {status: 404});
+    throw new Response(`blog not found`, { status: 404 })
   }
 
-  const [{blog}] = await Promise.all([
+  const [{ blog }] = await Promise.all([
     context.storefront.query(BLOGS_QUERY, {
       variables: {
         blogHandle: params.blogHandle,
@@ -44,13 +44,13 @@ async function loadCriticalData({context, request, params}) {
       },
     }),
     // Add other queries here, so that they are loaded in parallel
-  ]);
+  ])
 
   if (!blog?.articles) {
-    throw new Response('Not found', {status: 404});
+    throw new Response("Not found", { status: 404 })
   }
 
-  return {blog};
+  return { blog }
 }
 
 /**
@@ -59,31 +59,27 @@ async function loadCriticalData({context, request, params}) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
-function loadDeferredData({context}) {
-  return {};
+function loadDeferredData({ context }) {
+  return {}
 }
 
 export default function Blog() {
   /** @type {LoaderReturnData} */
-  const {blog} = useLoaderData();
-  const {articles} = blog;
+  const { blog } = useLoaderData()
+  const { articles } = blog
 
   return (
     <div className="blog">
       <h1>{blog.title}</h1>
       <div className="blog-grid">
         <PaginatedResourceSection connection={articles}>
-          {({node: article, index}) => (
-            <ArticleItem
-              article={article}
-              key={article.id}
-              loading={index < 2 ? 'eager' : 'lazy'}
-            />
+          {({ node: article, index }) => (
+            <ArticleItem article={article} key={article.id} loading={index < 2 ? "eager" : "lazy"} />
           )}
         </PaginatedResourceSection>
       </div>
     </div>
-  );
+  )
 }
 
 /**
@@ -92,12 +88,12 @@ export default function Blog() {
  *   loading?: HTMLImageElement['loading'];
  * }}
  */
-function ArticleItem({article, loading}) {
-  const publishedAt = new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(article.publishedAt));
+function ArticleItem({ article, loading }) {
+  const publishedAt = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(article.publishedAt))
   return (
     <div className="blog-article" key={article.id}>
       <Link to={`/blogs/${article.blog.handle}/${article.handle}`}>
@@ -116,7 +112,7 @@ function ArticleItem({article, loading}) {
         <small>{publishedAt}</small>
       </Link>
     </div>
-  );
+  )
 }
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/objects/blog
@@ -175,9 +171,10 @@ const BLOGS_QUERY = `#graphql
       handle
     }
   }
-`;
+`
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
 /** @typedef {import('storefrontapi.generated').ArticleItemFragment} ArticleItemFragment */
 /** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
+

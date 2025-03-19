@@ -70,14 +70,45 @@ export default function Homepage() {
         console.error("Video autoplay failed:", error)
       })
     }
+
+    // Function to handle video source selection based on screen width
+    const handleResize = () => {
+      if (videoRef.current) {
+        // Force reload the video when switching between sources
+        const wasPlaying = !videoRef.current.paused
+        if (wasPlaying) {
+          videoRef.current.load()
+          videoRef.current.play().catch((e) => console.error("Video play error:", e))
+        }
+      }
+    }
+
+    // Add resize listener
+    window.addEventListener("resize", handleResize)
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
   }, [])
 
   return (
     <div className="home-container">
-      {/* Full-screen background video */}
+      {/* Full-screen background video with responsive sources */}
       <div className="video-container">
         <video ref={videoRef} autoPlay muted loop playsInline className="background-video">
-          <source src="/videos/background.mp4" type="video/mp4" />
+          {/* Desktop video */}
+          <source
+            src="https://cdn.shopify.com/videos/c/o/v/215ea5cfe1f549ac889e15761d049bbd.mp4"
+            type="video/mp4"
+            media="(min-width: 768px)"
+          />
+          {/* Mobile video */}
+          <source
+            src="https://cdn.shopify.com/videos/c/o/v/e5f25076076549c381cd1318ce12feab.mov"
+            type="video/quicktime"
+            media="(max-width: 767px)"
+          />
           Your browser does not support the video tag.
         </video>
 
@@ -176,7 +207,8 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     }
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
+    @inContext(country: $country, language: LanguageCode)
+    @inContext(country: $country, language: LanguageCode) {
     products(first: 4, sortKey: UPDATED_AT, reverse: true) {
       nodes {
         ...RecommendedProduct

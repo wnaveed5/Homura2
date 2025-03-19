@@ -1,25 +1,25 @@
-import {useOptimisticCart} from '@shopify/hydrogen';
-import {Link} from '@remix-run/react';
-import {useAside} from '~/components/Aside';
-import {CartLineItem} from '~/components/CartLineItem';
-import {CartSummary} from './CartSummary';
+"use client"
+
+import { useOptimisticCart } from "@shopify/hydrogen"
+import { Link } from "@remix-run/react"
+import { useAside } from "~/components/Aside"
+import { CartLineItem } from "~/components/CartLineItem"
+import { CartSummary } from "./CartSummary"
 
 /**
  * The main cart component that displays the cart items and summary.
  * It is used by both the /cart route and the cart aside dialog.
  * @param {CartMainProps}
  */
-export function CartMain({layout, cart: originalCart}) {
+export function CartMain({ layout, cart: originalCart }) {
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
-  const cart = useOptimisticCart(originalCart);
+  const cart = useOptimisticCart(originalCart)
 
-  const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
-  const withDiscount =
-    cart &&
-    Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
-  const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
-  const cartHasItems = cart?.totalQuantity && cart?.totalQuantity > 0;
+  const linesCount = Boolean(cart?.lines?.nodes?.length || 0)
+  const withDiscount = cart && Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length)
+  const className = `cart-main ${withDiscount ? "with-discount" : ""}`
+  const cartHasItems = cart?.totalQuantity && cart?.totalQuantity > 0
 
   return (
     <div className={className}>
@@ -35,7 +35,7 @@ export function CartMain({layout, cart: originalCart}) {
         {cartHasItems && <CartSummary cart={cart} layout={layout} />}
       </div>
     </div>
-  );
+  )
 }
 
 /**
@@ -44,21 +44,18 @@ export function CartMain({layout, cart: originalCart}) {
  *   layout?: CartMainProps['layout'];
  * }}
  */
-function CartEmpty({hidden = false}) {
-  const {close} = useAside();
+function CartEmpty({ hidden = false }) {
+  const { close } = useAside()
   return (
     <div hidden={hidden}>
       <br />
-      <p>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
-      </p>
+      <p>Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you started!</p>
       <br />
       <Link to="/collections" onClick={close} prefetch="viewport">
         Continue shopping →
       </Link>
     </div>
-  );
+  )
 }
 
 /** @typedef {'page' | 'aside'} CartLayout */
@@ -70,3 +67,4 @@ function CartEmpty({hidden = false}) {
  */
 
 /** @typedef {import('storefrontapi.generated').CartApiQueryFragment} CartApiQueryFragment */
+
