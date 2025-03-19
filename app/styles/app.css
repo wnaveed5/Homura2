@@ -37,6 +37,7 @@ aside {
   right: calc(-1 * var(--aside-width));
   top: 0;
   transition: transform 200ms ease-in-out;
+  z-index: 50;
 }
 
 aside header {
@@ -159,13 +160,18 @@ button.reset:hover:not(:has(> *)) {
 */
 .header {
   align-items: center;
-  background: #fff;
+  background: transparent;
   display: flex;
   height: var(--header-height);
   padding: 0 1rem;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1;
+  width: 100%;
+  z-index: 40;
+}
+
+.header a {
+  color: var(--color-light);
 }
 
 .header-menu-mobile-toggle {
@@ -334,6 +340,84 @@ button.reset:hover:not(:has(> *)) {
 * routes/__index
 * --------------------------------------------------
 */
+.homepage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.background-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  color: var(--color-light);
+  text-align: center;
+}
+
+.hero-content {
+  padding: 2rem;
+  max-width: 800px;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: -0.05em;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.hero-cta {
+  margin-top: 2rem;
+}
+
+.cta-button {
+  display: inline-block;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
 .featured-collection {
   display: block;
   margin-bottom: 2rem;
@@ -481,7 +565,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .blog-article-image {
-  aspect-ratio: 3/2;
+  aspect-ratio: 3 / 2;
   display: block;
 }
 
@@ -508,3 +592,4 @@ button.reset:hover:not(:has(> *)) {
 .account-logout {
   display: inline-block;
 }
+

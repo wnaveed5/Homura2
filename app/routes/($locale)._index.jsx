@@ -1,25 +1,27 @@
-import {Await, useLoaderData, Link} from '@remix-run/react';
-import {Suspense} from 'react';
-import {Image, Money} from '@shopify/hydrogen';
+"use client"
+
+import { Link, useLoaderData } from "@remix-run/react"
+import { Image, Money } from "@shopify/hydrogen"
+import { useRef, useEffect } from "react"
 
 /**
  * @type {MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Homura'}];
-};
+  return [{ title: "Homura | Home" }]
+}
 
 /**
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
   // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
+  const deferredData = loadDeferredData(args)
 
   // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
+  const criticalData = await loadCriticalData(args)
 
-  return {...deferredData, ...criticalData};
+  return { ...deferredData, ...criticalData }
 }
 
 /**
@@ -27,15 +29,15 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({context}) {
-  const [{collections}] = await Promise.all([
+async function loadCriticalData({ context }) {
+  const [{ collections }] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     // Add other queries here, so that they are loaded in parallel
-  ]);
+  ])
 
   return {
     featuredCollection: collections.nodes[0],
-  };
+  }
 }
 
 /**
@@ -44,52 +46,64 @@ async function loadCriticalData({context}) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
-function loadDeferredData({context}) {
-  const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
-    .catch((error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
+function loadDeferredData({ context }) {
+  const recommendedProducts = context.storefront.query(RECOMMENDED_PRODUCTS_QUERY).catch((error) => {
+    // Log query errors, but don't throw them so the page can still render
+    console.error(error)
+    return null
+  })
 
   return {
     recommendedProducts,
-  };
+  }
 }
 
 export default function Homepage() {
   /** @type {LoaderReturnData} */
-  const data = useLoaderData();
-  return (
-    <div className="home">
-      <FeaturedCollection collection={data.featuredCollection} />
-      <RecommendedProducts products={data.recommendedProducts} />
-    </div>
-  );
-}
+  const data = useLoaderData()
+  const videoRef = useRef(null)
 
-/**
- * @param {{
- *   collection: FeaturedCollectionFragment;
- * }}
- */
-function FeaturedCollection({collection}) {
-  if (!collection) return null;
-  const image = collection?.image;
+  useEffect(() => {
+    // Ensure video plays automatically when component mounts
+    if (videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.error("Video autoplay failed:", error)
+      })
+    }
+  }, [])
+
   return (
-    <Link
-      className="featured-collection"
-      to={`/collections/${collection.handle}`}
-    >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
+    <div className="home-container">
+      {/* Full-screen background video */}
+      <div className="video-container">
+        <video ref={videoRef} autoPlay muted loop playsInline className="background-video">
+          <source src="/videos/background.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Overlay content */}
+        <div className="content-overlay">
+          <div className="hero-content">
+            <h1 className="hero-title">Homura</h1>
+            <p className="hero-subtitle">Elevate your style</p>
+            <div className="hero-cta">
+              <Link to="/collections" className="cta-button">
+                Shop Now
+              </Link>
+            </div>
+          </div>
         </div>
-      )}
-      <h1>{collection.title}</h1>
-    </Link>
-  );
+      </div>
+
+      {/* Featured products section */}
+      <section className="featured-products">
+        <h2 className="section-title">Featured Products</h2>
+        <div className="products-grid">
+          <RecommendedProducts products={data.recommendedProducts} />
+        </div>
+      </section>
+    </div>
+  )
 }
 
 /**
@@ -97,40 +111,24 @@ function FeaturedCollection({collection}) {
  *   products: Promise<RecommendedProductsQuery | null>;
  * }}
  */
-function RecommendedProducts({products}) {
+function RecommendedProducts({ products }) {
   return (
-    <div className="recommended-products">
-      <h2>Recommended Products</h2>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Await resolve={products}>
-          {(response) => (
-            <div className="recommended-products-grid">
-              {response
-                ? response.products.nodes.map((product) => (
-                    <Link
-                      key={product.id}
-                      className="recommended-product"
-                      to={`/products/${product.handle}`}
-                    >
-                      <Image
-                        data={product.images.nodes[0]}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 50vw"
-                      />
-                      <h4>{product.title}</h4>
-                      <small>
-                        <Money data={product.priceRange.minVariantPrice} />
-                      </small>
-                    </Link>
-                  ))
-                : null}
-            </div>
-          )}
-        </Await>
-      </Suspense>
-      <br />
-    </div>
-  );
+    <>
+      <div className="recommended-products-grid">
+        {products
+          ? products.products.nodes.map((product) => (
+              <Link key={product.id} className="recommended-product" to={`/products/${product.handle}`}>
+                <Image data={product.images.nodes[0]} aspectRatio="1/1" sizes="(min-width: 45em) 20vw, 50vw" />
+                <h4>{product.title}</h4>
+                <small>
+                  <Money data={product.priceRange.minVariantPrice} />
+                </small>
+              </Link>
+            ))
+          : null}
+      </div>
+    </>
+  )
 }
 
 const FEATURED_COLLECTION_QUERY = `#graphql
@@ -154,7 +152,7 @@ const FEATURED_COLLECTION_QUERY = `#graphql
       }
     }
   }
-`;
+`
 
 const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   fragment RecommendedProduct on Product {
@@ -185,10 +183,11 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       }
     }
   }
-`;
+`
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
 /** @typedef {import('storefrontapi.generated').FeaturedCollectionFragment} FeaturedCollectionFragment */
 /** @typedef {import('storefrontapi.generated').RecommendedProductsQuery} RecommendedProductsQuery */
 /** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
+
