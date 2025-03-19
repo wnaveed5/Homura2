@@ -96,7 +96,6 @@ function HeaderCtas({isLoggedIn, cart}) {
           </Await>
         </Suspense>
       </NavLink>
-      <SearchToggle />
       <CartToggle cart={cart} />
     </nav>
   );
@@ -110,15 +109,6 @@ function HeaderMenuMobileToggle() {
       onClick={() => open('mobile')}
     >
       <h3>☰</h3>
-    </button>
-  );
-}
-
-function SearchToggle() {
-  const {open} = useAside();
-  return (
-    <button className="reset" onClick={() => open('search')}>
-      Search Products
     </button>
   );
 }
